@@ -65,7 +65,7 @@ namespace Views.Pages.Degrees
                 }
             }
 
-            return RedirectToPage("./Index");
+            return RedirectToPage("../Index");
         }
 
         private bool DegreeExists(int id)

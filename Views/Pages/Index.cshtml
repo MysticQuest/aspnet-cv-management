@@ -1,10 +1,96 @@
 ﻿@page
-@model IndexModel
+@model Views.Pages.IndexModel
+
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Index";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<h1>Candidates</h1>
+
+<p>
+    <a asp-page="Candidates/Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Candidate[0].LastName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Candidate[0].FirstName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Candidate[0].Email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Candidate[0].Mobile)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Candidate[0].CV)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Candidate[0].CreationTime)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Candidate) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FirstName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Mobile)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CV)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreationTime)
+            </td>
+            <td>
+                <a asp-page="Candidates/Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-page="Candidates/Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-page="Candidates/Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+<div style="margin-top: 150px;"></div>
+
+<h2>Degrees</h2>
+
+<p>
+    <a asp-page="Degrees/Create">Add New Degree</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.Degree[0].Name)</th>
+            <th>@Html.DisplayNameFor(model => model.Degree[0].CreationTime)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Degree)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                <td>@Html.DisplayFor(modelItem => item.CreationTime)</td>
+                <td>
+                    <a asp-page="Degrees/Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-page="Degrees/Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

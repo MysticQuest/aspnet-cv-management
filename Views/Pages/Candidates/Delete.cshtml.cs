@@ -56,7 +56,7 @@ namespace Views.Pages.Candidates
                 await _context.SaveChangesAsync();
             }
 
-            return RedirectToPage("./Index");
+            return RedirectToPage("../Index");
         }
     }
 }

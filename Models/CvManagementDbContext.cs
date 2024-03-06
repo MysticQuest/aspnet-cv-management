@@ -13,5 +13,6 @@ namespace CvManagementApp.Models
 
         public DbSet<Candidate> Candidates { get; set; }
         public DbSet<Degree> Degrees { get; set; }
+        public DbSet<Entity> Entities { get; set; }
     }
 }

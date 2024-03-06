@@ -65,7 +65,7 @@ namespace Views.Pages.Candidates
                 }
             }
 
-            return RedirectToPage("./Index");
+            return RedirectToPage("../Index");
         }
 
         private bool CandidateExists(int id)
