@@ -94,6 +94,9 @@
 
 <p>
     <a asp-page="Degrees/Create">Add New Degree</a>
+    <span style="margin-left: 50px;">
+        <a asp-page="/Index" asp-page-handler="DeleteUnassociatedDegrees">Delete Unassociated Degrees</a>
+    </span>
 </p>
 <table class="table">
     <thead>

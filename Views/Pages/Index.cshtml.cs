@@ -33,6 +33,21 @@ namespace Views.Pages
             return File(candidate.CV, candidate.CVMimeType, candidate.CVFileName);
         }
 
+        public async Task<IActionResult> OnGetDeleteUnassociatedDegreesAsync()
+        {
+            var allDegrees = await _context.Degrees.ToListAsync();
+            var associatedDegrees = await _context.Candidates
+                                                  .SelectMany(c => c.Degrees)
+                                                  .Distinct()
+                                                  .ToListAsync();
+            var unassociatedDegrees = allDegrees.Except(associatedDegrees).ToList();
+            _context.Degrees.RemoveRange(unassociatedDegrees);
+            await _context.SaveChangesAsync();
+
+            return RedirectToPage();
+        }
+
+
         public async Task OnGetAsync()
         {
             Candidate = await _context.Candidates
