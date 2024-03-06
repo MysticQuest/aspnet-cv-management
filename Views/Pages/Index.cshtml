@@ -52,14 +52,7 @@
             <td>
                 @if (item.CV != null && item.CV.Length > 0)
                 {
-                    if (!string.IsNullOrEmpty(item.CVFileName))
-                    {
-                        <a asp-page="./Index" asp-page-handler="DownloadCV" asp-route-id="@item.Id">@item.CVFileName</a>
-                    }
-                    else
-                    {
-                        @:N/A
-                    }
+                    <a asp-page="./Index" asp-page-handler="DownloadCV" asp-route-id="@item.Id">@item.CVFileName</a>
                 }
                 else
                 {

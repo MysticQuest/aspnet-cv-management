@@ -36,10 +36,17 @@
             @Html.DisplayFor(model => model.Candidate.Mobile)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Candidate.CV)
+            CV
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Candidate.CV)
+            @if (Model.Candidate.CV != null && Model.Candidate.CV.Length > 0 && !string.IsNullOrEmpty(Model.Candidate.CVFileName))
+            {
+                <a asp-page="../Index" asp-page-handler="DownloadCV" asp-route-id="@Model.Candidate.Id">@Model.Candidate.CVFileName</a>
+            }
+            else
+            {
+                <text>N/A</text>
+            }
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Candidate.CreationTime)
