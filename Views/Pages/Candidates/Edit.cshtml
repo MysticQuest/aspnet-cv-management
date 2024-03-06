@@ -11,7 +11,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Candidate.LastName" class="control-label"></label>
@@ -33,11 +33,21 @@
                 <input asp-for="Candidate.Mobile" class="form-control" />
                 <span asp-validation-for="Candidate.Mobile" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Candidate.CV" class="control-label"></label>
-                <input asp-for="Candidate.CV" class="form-control" />
-                <span asp-validation-for="Candidate.CV" class="text-danger"></span>
-            </div>
+            <label class="control-label">
+                <div class="col-sm-10">
+                    @if (Model.Candidate.CV != null && Model.Candidate.CV.Length > 0 && !string.IsNullOrEmpty(Model.Candidate.CVFileName))
+                    {
+                        <a asp-page="/Index" asp-page-handler="DownloadCV" asp-route-id="@Model.Candidate.Id">@Model.Candidate.CVFileName</a>
+                    }
+                    else
+                    {
+                        <text>N/A</text>
+                    }
+                </div>
+                <label asp-for="UploadedDocument" class="control-label">Add New File</label>
+                <input type="file" asp-for="UploadedDocument" class="form-control" id="UploadedCV" />
+                <span asp-validation-for="UploadedDocument" class="text-danger"></span>
+            </label>
             <input type="hidden" asp-for="Candidate.Id" />
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

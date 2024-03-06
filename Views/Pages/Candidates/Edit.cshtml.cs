@@ -21,6 +21,8 @@ namespace Views.Pages.Candidates
 
         [BindProperty]
         public Candidate Candidate { get; set; } = default!;
+        [BindProperty]
+        public IFormFile UploadedDocument { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -42,6 +44,29 @@ namespace Views.Pages.Candidates
         // For more details, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
+            if (UploadedDocument != null && UploadedDocument.Length > 0)
+            {
+                var allowedContentTypes = new List<string>
+                {
+                    "application/pdf",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                };
+
+                if (!allowedContentTypes.Contains(UploadedDocument.ContentType))
+                {
+                    ModelState.AddModelError("UploadedDocument", "Only PDF and Word documents are allowed.");
+                }
+                else
+                {
+                    using var memoryStream = new MemoryStream();
+                    await UploadedDocument.CopyToAsync(memoryStream);
+                    Candidate.CV = memoryStream.ToArray();
+                    Candidate.CVFileName = UploadedDocument.FileName;
+                    Candidate.CVMimeType = UploadedDocument.ContentType;
+                }
+            }
+
             if (!ModelState.IsValid)
             {
                 return Page();
