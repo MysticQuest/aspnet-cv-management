@@ -29,6 +29,7 @@ namespace Views.Pages.Candidates
             }
 
             var candidate = await _context.Candidates.FirstOrDefaultAsync(m => m.Id == id);
+            Degree = await _context.Degrees.ToListAsync();
 
             if (candidate == null)
             {
@@ -49,7 +50,6 @@ namespace Views.Pages.Candidates
             }
 
             var candidate = await _context.Candidates.FindAsync(id);
-            Degree = await _context.Degrees.ToListAsync();
 
             if (candidate != null)
             {

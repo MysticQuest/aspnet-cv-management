@@ -23,6 +23,9 @@ namespace Views.Pages.Candidates
         public Candidate Candidate { get; set; } = default!;
         [BindProperty]
         public IFormFile UploadedDocument { get; set; }
+        public IList<Degree> Degree { get; set; }
+        [BindProperty]
+        public int[] SelectedDegreeIds { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -31,12 +34,27 @@ namespace Views.Pages.Candidates
                 return NotFound();
             }
 
+            Degree = await _context.Degrees.ToListAsync();
             var candidate =  await _context.Candidates.FirstOrDefaultAsync(m => m.Id == id);
+
+            Candidate = candidate;
+
             if (candidate == null)
             {
                 return NotFound();
             }
-            Candidate = candidate;
+
+            var candidateDegreeIds = Candidate.Degrees.Select(cd => cd.Id).ToList();
+
+            var allDegrees = Degree.Select(d => new SelectListItem
+            {
+                Value = d.Id.ToString(),
+                Text = d.Name,
+                Selected = candidateDegreeIds.Contains(d.Id)
+            }).ToList();
+
+            ViewData["AllDegrees"] = allDegrees;
+
             return Page();
         }
 
@@ -44,14 +62,28 @@ namespace Views.Pages.Candidates
         // For more details, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
+            // Fetch the existing candidate from the database including their degrees
+            var existingCandidate = await _context.Candidates
+                .Include(c => c.Degrees)
+                .FirstOrDefaultAsync(c => c.Id == Candidate.Id);
+
+            if (existingCandidate == null)
+            {
+                return NotFound("Candidate not found.");
+            }
+
+            // Update scalar properties from the Candidate object received from the form submission
+            _context.Entry(existingCandidate).CurrentValues.SetValues(Candidate);
+
+            // Handle document upload
             if (UploadedDocument != null && UploadedDocument.Length > 0)
             {
                 var allowedContentTypes = new List<string>
-                {
-                    "application/pdf",
-                    "application/msword",
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                };
+        {
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        };
 
                 if (!allowedContentTypes.Contains(UploadedDocument.ContentType))
                 {
@@ -59,11 +91,29 @@ namespace Views.Pages.Candidates
                 }
                 else
                 {
-                    using var memoryStream = new MemoryStream();
-                    await UploadedDocument.CopyToAsync(memoryStream);
-                    Candidate.CV = memoryStream.ToArray();
-                    Candidate.CVFileName = UploadedDocument.FileName;
-                    Candidate.CVMimeType = UploadedDocument.ContentType;
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await UploadedDocument.CopyToAsync(memoryStream);
+                        // Directly update the existing candidate's document-related properties
+                        existingCandidate.CV = memoryStream.ToArray();
+                        existingCandidate.CVFileName = UploadedDocument.FileName;
+                        existingCandidate.CVMimeType = UploadedDocument.ContentType;
+                    }
+                }
+            }
+
+            // Clear existing degrees and add selected ones
+            existingCandidate.Degrees.Clear();
+
+            if (SelectedDegreeIds != null && SelectedDegreeIds.Any())
+            {
+                var selectedDegrees = await _context.Degrees
+                    .Where(d => SelectedDegreeIds.Contains(d.Id))
+                    .ToListAsync();
+
+                foreach (var degree in selectedDegrees)
+                {
+                    existingCandidate.Degrees.Add(degree);
                 }
             }
 
@@ -72,26 +122,14 @@ namespace Views.Pages.Candidates
                 return Page();
             }
 
-            _context.Attach(Candidate).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CandidateExists(Candidate.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            // EF Core's change tracking will detect changes made to the existingCandidate
+            // and apply them upon SaveChangesAsync, including updates to scalar properties, 
+            // the Degrees collection, and any changes made to the document.
+            await _context.SaveChangesAsync();
 
             return RedirectToPage("../Index");
         }
+
 
         private bool CandidateExists(int id)
         {
