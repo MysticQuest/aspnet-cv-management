@@ -19,6 +19,7 @@ namespace Views.Pages.Candidates
         }
 
         public Candidate Candidate { get; set; } = default!;
+        public IList<Degree> Degree { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -28,6 +29,8 @@ namespace Views.Pages.Candidates
             }
 
             var candidate = await _context.Candidates.FirstOrDefaultAsync(m => m.Id == id);
+            Degree = await _context.Degrees.ToListAsync();
+
             if (candidate == null)
             {
                 return NotFound();

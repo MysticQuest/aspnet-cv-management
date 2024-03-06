@@ -36,7 +36,23 @@
             @Html.DisplayFor(model => model.Candidate.Mobile)
         </dd>
         <dt class="col-sm-2">
-            CV
+            @Html.DisplayNameFor(model => model.Candidate.Degrees)
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.Candidate.Degrees != null && Model.Candidate.Degrees.Count > 0)
+            {
+                foreach (var degree in Model.Candidate.Degrees)
+                {
+                    <div>@degree.Name</div>
+                }
+            }
+            else
+            {
+                <text>None</text>
+            }
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Candidate.CV)
         </dt>
         <dd class="col-sm-10">
             @if (Model.Candidate.CV != null && Model.Candidate.CV.Length > 0 && !string.IsNullOrEmpty(Model.Candidate.CVFileName))

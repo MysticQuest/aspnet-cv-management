@@ -20,7 +20,7 @@ namespace Views.Pages.Candidates
 
         [BindProperty]
         public Candidate Candidate { get; set; } = default!;
-
+        public IList<Degree> Degree { get; set; }
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
@@ -49,6 +49,8 @@ namespace Views.Pages.Candidates
             }
 
             var candidate = await _context.Candidates.FindAsync(id);
+            Degree = await _context.Degrees.ToListAsync();
+
             if (candidate != null)
             {
                 Candidate = candidate;

@@ -31,6 +31,20 @@ namespace Views.Pages.Candidates
 
         public async Task<IActionResult> OnPostAsync()
         {
+            if (SelectedDegreeIds != null && SelectedDegreeIds.Length > 0)
+            {
+                Candidate.Degrees = new List<Degree>();
+
+                foreach (var degreeId in SelectedDegreeIds)
+                {
+                    var degreeToAdd = await _context.Degrees.FindAsync(degreeId);
+                    if (degreeToAdd != null)
+                    {
+                        Candidate.Degrees.Add(degreeToAdd);
+                    }
+                }
+            }
+
             if (UploadedDocument != null && UploadedDocument.Length > 0)
             {
                 var allowedContentTypes = new List<string>
@@ -54,22 +68,9 @@ namespace Views.Pages.Candidates
                 }
             }
 
-            if (SelectedDegreeIds.Length > 0)
-            {
-                Candidate.Degrees = new List<Degree>();
-
-                foreach (var degreeId in SelectedDegreeIds)
-                {
-                    var degreeToAdd = await _context.Degrees.FindAsync(degreeId);
-                    if (degreeToAdd != null)
-                    {
-                        Candidate.Degrees.Add(degreeToAdd);
-                    }
-                }
-            }
-
             if (!ModelState.IsValid)
             {
+                ViewData["DegreeId"] = new SelectList(_context.Degrees, "Id", "Name");
                 return Page();
             }
 
