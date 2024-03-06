@@ -34,6 +34,12 @@ namespace Views.Pages.Degrees
                 return Page();
             }
 
+            if (_context.Degrees.Any(d => d.Name == Degree.Name))
+            {
+                ModelState.AddModelError("Degree.Name", "Degree name must be unique.");
+                return Page();
+            }
+
             _context.Degrees.Add(Degree);
             await _context.SaveChangesAsync();
 
