@@ -1,17 +1,24 @@
-﻿namespace CvManagementApp.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace CvManagementApp.Models
 {
     public class Candidate : Entity
     {
+        [Required]
         public string LastName { get; set; }
 
+        [Required]
         public string FirstName { get; set; }
 
+        [Required]
+        [EmailAddress]
         public string Email { get; set; }
 
-        public string Mobile { get; set; }
+        [StringLength(10, MinimumLength = 10, ErrorMessage = "Mobile number must be 10 digits.")]
+        public string? Mobile { get; set; }
 
-        public List<Degree> Degrees { get; set; } = new List<Degree>();
+        public List<Degree>? Degrees { get; set; } = new List<Degree>();
 
-        public byte[] CV { get; set; }
+        public byte[]? CV { get; set; }
     }
 }
