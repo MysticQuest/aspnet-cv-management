@@ -1,0 +1,60 @@
+﻿@page
+@model Views.Pages.Candidates.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Candidate</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Candidate.LastName" class="control-label"></label>
+                <input asp-for="Candidate.LastName" class="form-control" />
+                <span asp-validation-for="Candidate.LastName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Candidate.FirstName" class="control-label"></label>
+                <input asp-for="Candidate.FirstName" class="form-control" />
+                <span asp-validation-for="Candidate.FirstName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Candidate.Email" class="control-label"></label>
+                <input asp-for="Candidate.Email" class="form-control" />
+                <span asp-validation-for="Candidate.Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Candidate.Mobile" class="control-label"></label>
+                <input asp-for="Candidate.Mobile" class="form-control" />
+                <span asp-validation-for="Candidate.Mobile" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Candidate.CV" class="control-label"></label>
+                <input asp-for="Candidate.CV" class="form-control" />
+                <span asp-validation-for="Candidate.CV" class="text-danger"></span>
+            </div>
+            <input type="hidden" asp-for="Candidate.Id" />
+            <div class="form-group">
+                <label asp-for="Candidate.CreationTime" class="control-label"></label>
+                <input asp-for="Candidate.CreationTime" class="form-control" />
+                <span asp-validation-for="Candidate.CreationTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

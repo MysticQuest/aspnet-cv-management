@@ -21,8 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\Candidate\" />
-    <Folder Include="Pages\Degree\" />
+    <Folder Include="Pages\Degrees\" />
   </ItemGroup>
 
 </Project>
