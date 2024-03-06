@@ -49,9 +49,13 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Mobile)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CV)
-            </td>
+                <td>
+                    @if (item.CV != null && item.CV.Length > 0)
+                    {
+                        <a asp-page="./Index" asp-page-handler="DownloadCV" asp-route-id="@item.Id">CV</a>
+                    }
+                </td>
+
             <td>
                 @Html.DisplayFor(modelItem => item.CreationTime)
             </td>

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CvManagementApp.Models
 {
@@ -19,7 +20,7 @@ namespace CvManagementApp.Models
         public string? Mobile { get; set; }
 
         public List<Degree>? Degrees { get; set; } = new List<Degree>();
-
+        
         public byte[]? CV { get; set; }
     }
 }

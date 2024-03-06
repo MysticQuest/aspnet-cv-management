@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using CvManagementApp.Models;
 
 namespace Views.Pages.Candidates
@@ -18,17 +14,40 @@ namespace Views.Pages.Candidates
             _context = context;
         }
 
+        [BindProperty]
+        public Candidate Candidate { get; set; } = default!;
+
+        [BindProperty]
+        public IFormFile UploadedCV { get; set; }
+
         public IActionResult OnGet()
         {
             return Page();
         }
 
-        [BindProperty]
-        public Candidate Candidate { get; set; } = default!;
-
-        // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
         {
+            var allowedContentTypes = new List<string>
+            {
+                "application/pdf",
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            };
+
+            if (!allowedContentTypes.Contains(UploadedCV.ContentType))
+            {
+                ModelState.AddModelError("UploadedCV", "Only PDF and Word documents are allowed.");
+            }
+            else
+            {
+                // If the file is valid, read it into a byte array.
+                using (var memoryStream = new MemoryStream())
+                {
+                    await UploadedCV.CopyToAsync(memoryStream);
+                    Candidate.CV = memoryStream.ToArray();
+                }
+            }
+            
             if (!ModelState.IsValid)
             {
                 return Page();

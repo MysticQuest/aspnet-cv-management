@@ -21,6 +21,18 @@ namespace Views.Pages
         public IList<Candidate> Candidate { get; set; }
         public IList<Degree> Degree { get; set; }
 
+        public async Task<IActionResult> OnGetDownloadCVAsync(int id)
+        {
+            var candidate = await _context.Candidates
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (candidate == null || candidate.CV == null || candidate.CV.Length == 0)
+            {
+                return NotFound();
+            }
+            return File(candidate.CV, "application/pdf", "CandidateCV.pdf");
+        }
+
         public async Task OnGetAsync()
         {
             Candidate = await _context.Candidates.ToListAsync();
