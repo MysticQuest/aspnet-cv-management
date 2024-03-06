@@ -18,36 +18,39 @@ namespace Views.Pages.Candidates
         public Candidate Candidate { get; set; } = default!;
 
         [BindProperty]
-        public IFormFile UploadedCV { get; set; }
+        public IFormFile UploadedDocument { get; set; }
 
         public IActionResult OnGet()
         {
             return Page();
         }
 
+
         public async Task<IActionResult> OnPostAsync()
         {
-            var allowedContentTypes = new List<string>
+            if (UploadedDocument != null && UploadedDocument.Length > 0)
             {
-                "application/pdf",
-                "application/msword",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            };
-
-            if (!allowedContentTypes.Contains(UploadedCV.ContentType))
-            {
-                ModelState.AddModelError("UploadedCV", "Only PDF and Word documents are allowed.");
-            }
-            else
-            {
-                // If the file is valid, read it into a byte array.
-                using (var memoryStream = new MemoryStream())
+                var allowedContentTypes = new List<string>
                 {
-                    await UploadedCV.CopyToAsync(memoryStream);
+                    "application/pdf",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                };
+
+                if (!allowedContentTypes.Contains(UploadedDocument.ContentType))
+                {
+                    ModelState.AddModelError("UploadedDocument", "Only PDF and Word documents are allowed.");
+                }
+                else
+                {
+                    using var memoryStream = new MemoryStream();
+                    await UploadedDocument.CopyToAsync(memoryStream);
                     Candidate.CV = memoryStream.ToArray();
+                    Candidate.CVFileName = UploadedDocument.FileName; 
+                    Candidate.CVMimeType = UploadedDocument.ContentType; 
                 }
             }
-            
+
             if (!ModelState.IsValid)
             {
                 return Page();

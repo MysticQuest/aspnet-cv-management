@@ -23,14 +23,14 @@ namespace Views.Pages
 
         public async Task<IActionResult> OnGetDownloadCVAsync(int id)
         {
-            var candidate = await _context.Candidates
-                .FirstOrDefaultAsync(x => x.Id == id);
+            var candidate = await _context.Candidates.FirstOrDefaultAsync(x => x.Id == id);
 
             if (candidate == null || candidate.CV == null || candidate.CV.Length == 0)
             {
                 return NotFound();
             }
-            return File(candidate.CV, "application/pdf", "CandidateCV.pdf");
+
+            return File(candidate.CV, candidate.CVMimeType, candidate.CVFileName);
         }
 
         public async Task OnGetAsync()

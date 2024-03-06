@@ -22,5 +22,7 @@ namespace CvManagementApp.Models
         public List<Degree>? Degrees { get; set; } = new List<Degree>();
         
         public byte[]? CV { get; set; }
+        public string? CVFileName { get; set; }
+        public string? CVMimeType { get; set; }
     }
 }

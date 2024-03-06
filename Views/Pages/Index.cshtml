@@ -49,13 +49,23 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Mobile)
             </td>
-                <td>
-                    @if (item.CV != null && item.CV.Length > 0)
+            <td>
+                @if (item.CV != null && item.CV.Length > 0)
+                {
+                    if (!string.IsNullOrEmpty(item.CVFileName))
                     {
-                        <a asp-page="./Index" asp-page-handler="DownloadCV" asp-route-id="@item.Id">CV</a>
+                        <a asp-page="./Index" asp-page-handler="DownloadCV" asp-route-id="@item.Id">@item.CVFileName</a>
                     }
-                </td>
-
+                    else
+                    {
+                        @:N/A
+                    }
+                }
+                else
+                {
+                    @:N/A
+                }
+            </td>
             <td>
                 @Html.DisplayFor(modelItem => item.CreationTime)
             </td>
