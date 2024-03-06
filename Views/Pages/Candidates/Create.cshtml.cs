@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using CvManagementApp.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Views.Pages.Candidates
 {
@@ -16,15 +17,17 @@ namespace Views.Pages.Candidates
 
         [BindProperty]
         public Candidate Candidate { get; set; } = default!;
+        [BindProperty]
+        public int[] SelectedDegreeIds { get; set; }
 
         [BindProperty]
         public IFormFile UploadedDocument { get; set; }
 
         public IActionResult OnGet()
         {
+            ViewData["DegreeId"] = new SelectList(_context.Degrees, "Id", "Name");
             return Page();
         }
-
 
         public async Task<IActionResult> OnPostAsync()
         {
@@ -48,6 +51,20 @@ namespace Views.Pages.Candidates
                     Candidate.CV = memoryStream.ToArray();
                     Candidate.CVFileName = UploadedDocument.FileName; 
                     Candidate.CVMimeType = UploadedDocument.ContentType; 
+                }
+            }
+
+            if (SelectedDegreeIds.Length > 0)
+            {
+                Candidate.Degrees = new List<Degree>();
+
+                foreach (var degreeId in SelectedDegreeIds)
+                {
+                    var degreeToAdd = await _context.Degrees.FindAsync(degreeId);
+                    if (degreeToAdd != null)
+                    {
+                        Candidate.Degrees.Add(degreeToAdd);
+                    }
                 }
             }
 
