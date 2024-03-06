@@ -14,6 +14,7 @@ namespace CvManagementApp.Models
         [EmailAddress]
         public string Email { get; set; }
 
+        [Phone]
         [StringLength(10, MinimumLength = 10, ErrorMessage = "Mobile number must be 10 digits.")]
         public string? Mobile { get; set; }
 
