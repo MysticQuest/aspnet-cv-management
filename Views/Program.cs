@@ -13,8 +13,10 @@ void ConfigureServices(IServiceCollection services)
 {
     services.AddRazorPages();
 
+    var inMemoryDbName = 
+        builder.Configuration.GetValue<string>("InMemoryDatabase:Name") ?? "CvManagementDb";
     builder.Services.AddDbContext<CvManagementDbContext>(options =>
-    options.UseInMemoryDatabase("CvManagementDb"));
+    options.UseInMemoryDatabase(inMemoryDbName));
 }
 
 void ConfigureApp(WebApplication app)
