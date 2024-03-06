@@ -17,6 +17,8 @@ void ConfigureServices(IServiceCollection services)
         builder.Configuration.GetValue<string>("InMemoryDatabase:Name") ?? "CvManagementDb";
     builder.Services.AddDbContext<CvManagementDbContext>(options =>
     options.UseInMemoryDatabase(inMemoryDbName));
+
+    services.AddControllers(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 }
 
 void ConfigureApp(WebApplication app)

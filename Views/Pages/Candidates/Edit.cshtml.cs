@@ -62,7 +62,6 @@ namespace Views.Pages.Candidates
         // For more details, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
-            // Fetch the existing candidate from the database including their degrees
             var existingCandidate = await _context.Candidates
                 .Include(c => c.Degrees)
                 .FirstOrDefaultAsync(c => c.Id == Candidate.Id);
@@ -72,10 +71,8 @@ namespace Views.Pages.Candidates
                 return NotFound("Candidate not found.");
             }
 
-            // Update scalar properties from the Candidate object received from the form submission
             _context.Entry(existingCandidate).CurrentValues.SetValues(Candidate);
 
-            // Handle document upload
             if (UploadedDocument != null && UploadedDocument.Length > 0)
             {
                 var allowedContentTypes = new List<string>
@@ -94,7 +91,6 @@ namespace Views.Pages.Candidates
                     using (var memoryStream = new MemoryStream())
                     {
                         await UploadedDocument.CopyToAsync(memoryStream);
-                        // Directly update the existing candidate's document-related properties
                         existingCandidate.CV = memoryStream.ToArray();
                         existingCandidate.CVFileName = UploadedDocument.FileName;
                         existingCandidate.CVMimeType = UploadedDocument.ContentType;
@@ -102,7 +98,6 @@ namespace Views.Pages.Candidates
                 }
             }
 
-            // Clear existing degrees and add selected ones
             existingCandidate.Degrees.Clear();
 
             if (SelectedDegreeIds != null && SelectedDegreeIds.Any())
@@ -122,9 +117,6 @@ namespace Views.Pages.Candidates
                 return Page();
             }
 
-            // EF Core's change tracking will detect changes made to the existingCandidate
-            // and apply them upon SaveChangesAsync, including updates to scalar properties, 
-            // the Degrees collection, and any changes made to the document.
             await _context.SaveChangesAsync();
 
             return RedirectToPage("../Index");
