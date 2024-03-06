@@ -35,7 +35,9 @@ namespace Views.Pages
 
         public async Task OnGetAsync()
         {
-            Candidate = await _context.Candidates.ToListAsync();
+            Candidate = await _context.Candidates
+                          .Include(c => c.Degrees)
+                          .ToListAsync();
             Degree = await _context.Degrees.ToListAsync();
         }
     }

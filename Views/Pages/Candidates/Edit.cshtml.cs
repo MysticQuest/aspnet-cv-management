@@ -34,26 +34,24 @@ namespace Views.Pages.Candidates
                 return NotFound();
             }
 
-            Degree = await _context.Degrees.ToListAsync();
-            var candidate =  await _context.Candidates.FirstOrDefaultAsync(m => m.Id == id);
+            Candidate = await _context.Candidates
+                                      .Include(c => c.Degrees)
+                                      .FirstOrDefaultAsync(m => m.Id == id.Value);
 
-            Candidate = candidate;
-
-            if (candidate == null)
+            if (Candidate == null)
             {
                 return NotFound();
             }
 
-            var candidateDegreeIds = Candidate.Degrees.Select(cd => cd.Id).ToList();
+            Degree = await _context.Degrees.ToListAsync();
 
-            var allDegrees = Degree.Select(d => new SelectListItem
+            var candidateDegreeIds = Candidate.Degrees.Select(d => d.Id).ToList();
+            ViewData["AllDegrees"] = Degree.Select(d => new SelectListItem
             {
                 Value = d.Id.ToString(),
                 Text = d.Name,
                 Selected = candidateDegreeIds.Contains(d.Id)
             }).ToList();
-
-            ViewData["AllDegrees"] = allDegrees;
 
             return Page();
         }
@@ -76,11 +74,11 @@ namespace Views.Pages.Candidates
             if (UploadedDocument != null && UploadedDocument.Length > 0)
             {
                 var allowedContentTypes = new List<string>
-        {
-            "application/pdf",
-            "application/msword",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        };
+                {
+                    "application/pdf",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                };
 
                 if (!allowedContentTypes.Contains(UploadedDocument.ContentType))
                 {

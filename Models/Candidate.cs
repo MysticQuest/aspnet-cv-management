@@ -19,8 +19,8 @@ namespace CvManagementApp.Models
         [StringLength(10, MinimumLength = 10, ErrorMessage = "Mobile number must be 10 digits.")]
         public string? Mobile { get; set; }
 
-        public List<Degree>? Degrees { get; set; } = new List<Degree>();
-        
+        public ICollection<Degree>? Degrees { get; private set; } = new List<Degree>();
+
         public byte[]? CV { get; set; }
         public string? CVFileName { get; set; }
         public string? CVMimeType { get; set; }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using CvManagementApp.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace Views.Pages.Candidates
 {
@@ -17,6 +18,7 @@ namespace Views.Pages.Candidates
 
         [BindProperty]
         public Candidate Candidate { get; set; } = default!;
+
         [BindProperty]
         public int[] SelectedDegreeIds { get; set; }
 
@@ -31,18 +33,13 @@ namespace Views.Pages.Candidates
 
         public async Task<IActionResult> OnPostAsync()
         {
+            var degreesToAdd = new List<Degree>();
+
             if (SelectedDegreeIds != null && SelectedDegreeIds.Length > 0)
             {
-                Candidate.Degrees = new List<Degree>();
-
-                foreach (var degreeId in SelectedDegreeIds)
-                {
-                    var degreeToAdd = await _context.Degrees.FindAsync(degreeId);
-                    if (degreeToAdd != null)
-                    {
-                        Candidate.Degrees.Add(degreeToAdd);
-                    }
-                }
+                degreesToAdd = await _context.Degrees
+                    .Where(d => SelectedDegreeIds.Contains(d.Id))
+                    .ToListAsync();
             }
 
             if (UploadedDocument != null && UploadedDocument.Length > 0)
@@ -75,6 +72,12 @@ namespace Views.Pages.Candidates
             }
 
             _context.Candidates.Add(Candidate);
+
+            foreach (var degree in degreesToAdd)
+            {
+                Candidate.Degrees.Add(degree);
+            }
+
             await _context.SaveChangesAsync();
 
             return RedirectToPage("../Index");
