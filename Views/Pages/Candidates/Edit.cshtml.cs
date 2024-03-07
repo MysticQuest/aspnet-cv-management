@@ -60,7 +60,7 @@ namespace Views.Pages.Candidates
 
             if (!ModelState.IsValid)
             {
-                await LoadFormDataAsync();
+                await LoadFormDataAsync(Candidate.Id);
                 return Page();
             }
 
@@ -71,19 +71,18 @@ namespace Views.Pages.Candidates
         {
             if (candidateId.HasValue)
             {
-                Candidate = await _candidateRepository.GetByCandidateIdDegreeListAsync(candidateId.Value)
-                    ?? new Candidate();
+                Candidate = await _candidateRepository.GetByCandidateIdDegreeListAsync(candidateId.Value) ?? new Candidate();
             }
 
             var allDegrees = await _degreeRepository.GetAllAsync();
-            var selectedIds = Candidate?.Degrees?.Select(d => d.Id).ToList() ?? new List<int>();
+            ViewData["AllDegrees"] = new SelectList(allDegrees, "Id", "Name");
 
-            ViewData["AllDegrees"] = allDegrees.Select(d => new SelectListItem
+            var currentlySelectedIds = Candidate?.Degrees?.Select(d => d.Id).ToList() ?? new List<int>();
+            if (SelectedDegreeIds != null && SelectedDegreeIds.Any())
             {
-                Value = d.Id.ToString(),
-                Text = d.Name,
-                Selected = selectedIds.Contains(d.Id)
-            }).ToList();
+                currentlySelectedIds = currentlySelectedIds.Union(SelectedDegreeIds).Distinct().ToList();
+            }
+            ViewData["SelectedDegreeIds"] = currentlySelectedIds;
         }
 
         private bool IsValidFileType(string contentType)
