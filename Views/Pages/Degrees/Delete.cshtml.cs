@@ -1,25 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using CvManagementApp.Models;
+using CvManagementApp.Services;
 
 namespace Views.Pages.Degrees
 {
     public class DeleteModel : PageModel
     {
-        private readonly CvManagementApp.Models.CvManagementDbContext _context;
+        private readonly IRepository<Degree> _degreeRepository;
 
-        public DeleteModel(CvManagementApp.Models.CvManagementDbContext context)
+        public DeleteModel(IRepository<Degree> degreeRepository)
         {
-            _context = context;
+            _degreeRepository = degreeRepository;
         }
 
         [BindProperty]
-        public Degree Degree { get; set; } = default!;
+        public Degree Degree { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -28,33 +25,23 @@ namespace Views.Pages.Degrees
                 return NotFound();
             }
 
-            var degree = await _context.Degrees.FirstOrDefaultAsync(m => m.Id == id);
+            Degree = await _degreeRepository.GetByIdAsync(id.Value);
 
-            if (degree == null)
+            if (Degree == null)
             {
                 return NotFound();
-            }
-            else
-            {
-                Degree = degree;
             }
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(int? id)
+        public async Task<IActionResult> OnPostAsync()
         {
-            if (id == null)
+            if (Degree?.Id == null)
             {
                 return NotFound();
             }
 
-            var degree = await _context.Degrees.FindAsync(id);
-            if (degree != null)
-            {
-                Degree = degree;
-                _context.Degrees.Remove(Degree);
-                await _context.SaveChangesAsync();
-            }
+            await _degreeRepository.DeleteAsync(Degree.Id);
 
             return RedirectToPage("../Index");
         }

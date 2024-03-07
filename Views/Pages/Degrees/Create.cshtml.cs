@@ -1,30 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using CvManagementApp.Models;
+using CvManagementApp.Services;
 
 namespace Views.Pages.Degrees
 {
     public class CreateModel : PageModel
     {
-        private readonly CvManagementApp.Models.CvManagementDbContext _context;
+        private readonly IRepository<Degree> _degreeRepository;
 
-        public CreateModel(CvManagementApp.Models.CvManagementDbContext context)
+        public CreateModel(IRepository<Degree> degreeRepository)
         {
-            _context = context;
+            _degreeRepository = degreeRepository;
         }
+
+        [BindProperty]
+        public Degree Degree { get; set; } = default!;
 
         public IActionResult OnGet()
         {
             return Page();
         }
-
-        [BindProperty]
-        public Degree Degree { get; set; } = default!;
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
@@ -34,14 +31,14 @@ namespace Views.Pages.Degrees
                 return Page();
             }
 
-            if (_context.Degrees.Any(d => d.Name == Degree.Name))
+            var existingDegrees = await _degreeRepository.GetAllAsync();
+            if (existingDegrees.Any(d => d.Name == Degree.Name))
             {
                 ModelState.AddModelError("Degree.Name", "Degree name must be unique.");
                 return Page();
             }
 
-            _context.Degrees.Add(Degree);
-            await _context.SaveChangesAsync();
+            await _degreeRepository.AddAsync(Degree);
 
             return RedirectToPage("../Index");
         }

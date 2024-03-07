@@ -7,20 +7,21 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CvManagementApp.Models;
+using CvManagementApp.Services;
 
 namespace Views.Pages.Degrees
 {
     public class EditModel : PageModel
     {
-        private readonly CvManagementApp.Models.CvManagementDbContext _context;
+        private readonly IRepository<Degree> _degreeRepository;
 
-        public EditModel(CvManagementApp.Models.CvManagementDbContext context)
+        public EditModel(IRepository<Degree> degreeRepository)
         {
-            _context = context;
+            _degreeRepository = degreeRepository;
         }
 
         [BindProperty]
-        public Degree Degree { get; set; } = default!;
+        public Degree Degree { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -29,12 +30,12 @@ namespace Views.Pages.Degrees
                 return NotFound();
             }
 
-            var degree =  await _context.Degrees.FirstOrDefaultAsync(m => m.Id == id);
-            if (degree == null)
+            Degree = await _degreeRepository.GetByIdAsync(id.Value);
+
+            if (Degree == null)
             {
                 return NotFound();
             }
-            Degree = degree;
             return Page();
         }
 
@@ -47,30 +48,30 @@ namespace Views.Pages.Degrees
                 return Page();
             }
 
-            _context.Attach(Degree).State = EntityState.Modified;
+            var degrees = await _degreeRepository.GetAllAsync();
+            var existingDegree = degrees.FirstOrDefault(d => d.Name.Equals(Degree.Name, StringComparison.OrdinalIgnoreCase) && d.Id != Degree.Id);
 
-            try
+            if (existingDegree != null)
             {
-                await _context.SaveChangesAsync();
+                ModelState.AddModelError("Degree.Name", "Degree name must be unique.");
+                return Page();
             }
-            catch (DbUpdateConcurrencyException)
+
+            if (Degree == null)
             {
-                if (!DegreeExists(Degree.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
+
+            await _degreeRepository.UpdateAsync(Degree);
 
             return RedirectToPage("../Index");
         }
 
-        private bool DegreeExists(int id)
+
+        private async Task<bool> DegreeExists(int id)
         {
-            return _context.Degrees.Any(e => e.Id == id);
+            var degree = await _degreeRepository.GetByIdAsync(id);
+            return degree != null;
         }
     }
 }
