@@ -70,11 +70,24 @@ namespace CvManagementApp.Services
                                           .Include(c => c.Degrees)
                                           .FirstOrDefaultAsync(c => c.Id == candidateId);
 
+            if (candidate == null)
+            {
+                throw new ArgumentException($"Candidate with ID {candidateId} not found.");
+            }
+
             var degreesToSet = await _context.Degrees
                                              .Where(degree => degreeIds.Contains(degree.Id))
                                              .ToListAsync();
 
-            candidate.Degrees.Clear();
+            if (candidate.Degrees != null)
+            {
+                candidate.Degrees.Clear();
+            }
+            else
+            {
+                candidate.Degrees = new List<Degree>();
+            }
+
             foreach (var degree in degreesToSet)
             {
                 candidate.Degrees.Add(degree);

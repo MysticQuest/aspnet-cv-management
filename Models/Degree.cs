@@ -5,6 +5,6 @@ namespace CvManagementApp.Models
     public class Degree : Entity
     {
         [Required]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
     }
 }
