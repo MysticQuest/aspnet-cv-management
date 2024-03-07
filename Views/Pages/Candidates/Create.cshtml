@@ -34,15 +34,17 @@
                 <span asp-validation-for="Candidate.Mobile" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Candidate.Degrees" class="control-label">Degrees</label>
+                <label asp-for="Candidate.Degrees" class="control-label"></label>
                 @{
                     var degrees = ViewData["DegreeId"] as SelectList;
                     if (degrees != null && degrees.Any())
                     {
-                        foreach (var degree in degrees)
+                        var selectedDegreeIds = ViewData["SelectedDegreeIds"] as int[];
+                        foreach (var degree in ViewData["DegreeId"] as SelectList)
                         {
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="SelectedDegreeIds" value="@degree.Value" />
+                                <input class="form-check-input" type="checkbox" name="SelectedDegreeIds" value="@degree.Value"
+                                @(selectedDegreeIds != null && selectedDegreeIds.Contains(int.Parse(degree.Value)) ? "checked" : "") />
                                 <label class="form-check-label">@degree.Text</label>
                             </div>
                         }

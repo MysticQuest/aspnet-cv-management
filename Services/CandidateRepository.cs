@@ -1,11 +1,6 @@
 ﻿using CvManagementApp.Models;
-using CvManagementApp.Services;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace CvManagementApp.Services
 {
@@ -21,6 +16,32 @@ namespace CvManagementApp.Services
         public async Task<IEnumerable<Candidate>> GetAllAsyncWithDegrees()
         {
             return await _context.Candidates.Include(c => c.Degrees).ToListAsync();
+        }
+
+        public async Task UpdateCandidateAsync(Candidate candidate, IFormFile uploadedDocument)
+        {
+            var existingCandidate = await _context.Candidates.Include(c => c.Degrees).FirstOrDefaultAsync(c => c.Id == candidate.Id);
+            if (existingCandidate == null)
+            {
+                throw new ArgumentException("Candidate not found.");
+            }
+
+            // Map properties excluding CV data
+            existingCandidate.FirstName = candidate.FirstName;
+            existingCandidate.LastName = candidate.LastName;
+            // Continue mapping other properties...
+
+            // Update CV only if a new valid file is uploaded
+            if (uploadedDocument != null && uploadedDocument.Length > 0)
+            {
+                using var memoryStream = new MemoryStream();
+                await uploadedDocument.CopyToAsync(memoryStream);
+                existingCandidate.CV = memoryStream.ToArray();
+                existingCandidate.CVFileName = uploadedDocument.FileName;
+                existingCandidate.CVMimeType = uploadedDocument.ContentType;
+            }
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<Degree>> GetAllUsedUniqueDegreesAsync()

@@ -39,14 +39,7 @@ namespace Views.Pages.Candidates
                 return NotFound();
             }
 
-            var allDegrees = await _degreeRepository.GetAllAsync();
-            ViewData["AllDegrees"] = allDegrees.Select(d => new SelectListItem
-            {
-                Value = d.Id.ToString(),
-                Text = d.Name,
-                Selected = Candidate.Degrees.Any(cd => cd.Id == d.Id)
-            }).ToList();
-
+            await LoadFormDataAsync(id);
             return Page();
         }
 
@@ -54,40 +47,52 @@ namespace Views.Pages.Candidates
         // For more details, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
-            if (UploadedDocument != null && UploadedDocument.Length > 0)
+            if (UploadedDocument != null && UploadedDocument.Length > 0 && !IsValidFileType(UploadedDocument.ContentType))
             {
-                var allowedContentTypes = new List<string>
-                {
-                    "application/pdf",
-                    "application/msword",
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                };
-
-                if (!allowedContentTypes.Contains(UploadedDocument.ContentType))
-                {
-                    ModelState.AddModelError("UploadedDocument", "Only PDF and Word documents are allowed.");
-                }
-                else
-                {
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        await UploadedDocument.CopyToAsync(memoryStream);
-                        Candidate.CV = memoryStream.ToArray();
-                        Candidate.CVFileName = UploadedDocument.FileName;
-                        Candidate.CVMimeType = UploadedDocument.ContentType;
-                    }
-                }
-            }
-
-            if (!ModelState.IsValid)
-            {
+                ModelState.AddModelError("UploadedDocument", "Only PDF and Word documents are allowed.");
+                await LoadFormDataAsync(Candidate.Id);
                 return Page();
             }
 
-            await _candidateRepository.UpdateAsync(Candidate);
+            await _candidateRepository.UpdateCandidateAsync(Candidate, UploadedDocument);
             await _candidateRepository.SetCandidateDegreesAsync(Candidate.Id, SelectedDegreeIds);
 
+            if (!ModelState.IsValid)
+            {
+                await LoadFormDataAsync();
+                return Page();
+            }
+
             return RedirectToPage("../Index");
+        }
+
+        private async Task LoadFormDataAsync(int? candidateId = null)
+        {
+            if (candidateId.HasValue)
+            {
+                Candidate = await _candidateRepository.GetByCandidateIdDegreeListAsync(candidateId.Value);
+            }
+
+            var allDegrees = await _degreeRepository.GetAllAsync();
+            var selectedIds = Candidate?.Degrees.Select(d => d.Id).ToList() ?? new List<int>();
+
+            ViewData["AllDegrees"] = allDegrees.Select(d => new SelectListItem
+            {
+                Value = d.Id.ToString(),
+                Text = d.Name,
+                Selected = selectedIds.Contains(d.Id)
+            }).ToList();
+        }
+
+        private bool IsValidFileType(string contentType)
+        {
+            var allowedContentTypes = new List<string>
+            {
+                "application/pdf",
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            };
+            return allowedContentTypes.Contains(contentType);
         }
     }
 }
