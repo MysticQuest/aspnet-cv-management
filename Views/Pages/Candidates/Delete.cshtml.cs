@@ -6,21 +6,21 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using CvManagementApp.Models;
+using CvManagementApp.Services;
 
 namespace Views.Pages.Candidates
 {
     public class DeleteModel : PageModel
     {
-        private readonly CvManagementApp.Models.CvManagementDbContext _context;
+        private readonly ICandidateRepository candidateRepository;
 
-        public DeleteModel(CvManagementApp.Models.CvManagementDbContext context)
+        public DeleteModel(ICandidateRepository candidateRepository)
         {
-            _context = context;
+            this.candidateRepository = candidateRepository;
         }
 
         [BindProperty]
         public Candidate Candidate { get; set; } = default!;
-        public IList<Degree> Degree { get; set; }
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
@@ -28,36 +28,23 @@ namespace Views.Pages.Candidates
                 return NotFound();
             }
 
-            var candidate = await _context.Candidates.FirstOrDefaultAsync(m => m.Id == id);
-            Degree = await _context.Degrees.ToListAsync();
+            Candidate = await candidateRepository.GetByCandidateIdDegreeListAsync(id.Value);
 
-            if (candidate == null)
+            if (Candidate == null)
             {
                 return NotFound();
             }
-            else
-            {
-                Candidate = candidate;
-            }
+
             return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(int? id)
         {
-            if (id == null)
+            if (id == null || Candidate == null)
             {
                 return NotFound();
             }
-
-            var candidate = await _context.Candidates.FindAsync(id);
-
-            if (candidate != null)
-            {
-                Candidate = candidate;
-                _context.Candidates.Remove(Candidate);
-                await _context.SaveChangesAsync();
-            }
-
+            await candidateRepository.DeleteAsync(Candidate.Id);
             return RedirectToPage("../Index");
         }
     }
