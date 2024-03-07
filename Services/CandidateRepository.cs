@@ -18,7 +18,7 @@ namespace CvManagementApp.Services
             return await _context.Candidates.Include(c => c.Degrees).ToListAsync();
         }
 
-        public async Task UpdateCandidateAsync(Candidate candidate, IFormFile uploadedDocument)
+        public async Task UpdateCandidateAsync(Candidate candidate, IFormFile? uploadedDocument)
         {
             var existingCandidate = await _context.Candidates.Include(c => c.Degrees).FirstOrDefaultAsync(c => c.Id == candidate.Id);
             if (existingCandidate == null)
@@ -26,12 +26,11 @@ namespace CvManagementApp.Services
                 throw new ArgumentException("Candidate not found.");
             }
 
-            // Map properties excluding CV data
             existingCandidate.FirstName = candidate.FirstName;
-            existingCandidate.LastName = candidate.LastName;
-            // Continue mapping other properties...
+            existingCandidate.LastName = candidate.FirstName;
+            existingCandidate.Email = candidate.Email;
+            existingCandidate.Mobile = candidate.Mobile;
 
-            // Update CV only if a new valid file is uploaded
             if (uploadedDocument != null && uploadedDocument.Length > 0)
             {
                 using var memoryStream = new MemoryStream();
@@ -46,13 +45,15 @@ namespace CvManagementApp.Services
 
         public async Task<IEnumerable<Degree>> GetAllUsedUniqueDegreesAsync()
         {
-            var usedDegrees = await _context.Candidates
-                                            .AsNoTracking()
-                                            .Include(c => c.Degrees)
-                                            .Where(c => c.Degrees != null)
-                                            .SelectMany(c => c.Degrees!)
-                                            .Distinct()
-                                            .ToListAsync();
+            var candidatesWithDegrees = await _context.Candidates
+                                                       .Include(c => c.Degrees)
+                                                       .ToListAsync();
+
+            var usedDegrees = candidatesWithDegrees.SelectMany(c => c.Degrees ?? Enumerable.Empty<Degree>())
+                                                   .GroupBy(d => d.Id)
+                                                   .Select(g => g.First())
+                                                   .ToList();
+
             return usedDegrees;
         }
 

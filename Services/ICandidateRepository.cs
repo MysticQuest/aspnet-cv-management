@@ -12,7 +12,7 @@ namespace CvManagementApp.Services
     public interface ICandidateRepository : IRepository<Candidate>
     {
         Task<IEnumerable<Candidate>> GetAllAsyncWithDegrees();
-        Task UpdateCandidateAsync(Candidate candidate, IFormFile uploadedDocument);
+        Task UpdateCandidateAsync(Candidate candidate, IFormFile? uploadedDocument);
         Task<Candidate?> GetByCandidateIdDegreeListAsync(int candidateId);
         Task<IEnumerable<Degree>> GetAllUsedUniqueDegreesAsync();
         Task SetCandidateDegreesAsync(int candidateId, IEnumerable<int> degreeIds);

@@ -22,10 +22,10 @@ namespace Views.Pages.Candidates
         public Candidate Candidate { get; set; } = default!;
 
         [BindProperty]
-        public int[] SelectedDegreeIds { get; set; }
+        public int[] SelectedDegreeIds { get; set; } = default!;
 
         [BindProperty]
-        public IFormFile UploadedDocument { get; set; }
+        public IFormFile? UploadedDocument { get; set; } = default!;
 
         public async Task<IActionResult> OnGet()
         {

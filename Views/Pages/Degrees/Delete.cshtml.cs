@@ -16,7 +16,7 @@ namespace Views.Pages.Degrees
         }
 
         [BindProperty]
-        public Degree Degree { get; set; }
+        public Degree Degree { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -25,7 +25,8 @@ namespace Views.Pages.Degrees
                 return NotFound();
             }
 
-            Degree = await _degreeRepository.GetByIdAsync(id.Value);
+            Degree = await _degreeRepository.GetByIdAsync(id.Value)
+                ?? new Degree();
 
             if (Degree == null)
             {

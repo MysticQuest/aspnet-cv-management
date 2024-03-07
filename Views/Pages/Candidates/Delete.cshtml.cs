@@ -28,7 +28,8 @@ namespace Views.Pages.Candidates
                 return NotFound();
             }
 
-            Candidate = await candidateRepository.GetByCandidateIdDegreeListAsync(id.Value);
+            Candidate = await candidateRepository.GetByCandidateIdDegreeListAsync(id.Value)
+                ?? new Candidate();
 
             if (Candidate == null)
             {

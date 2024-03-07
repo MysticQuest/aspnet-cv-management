@@ -19,7 +19,7 @@ namespace Views.Pages.Candidates
             _candidateRepository = candidateRepository;
         }
 
-        public Candidate Candidate { get; set; }
+        public Candidate Candidate { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -28,7 +28,8 @@ namespace Views.Pages.Candidates
                 return NotFound();
             }
 
-            Candidate = await _candidateRepository.GetByCandidateIdDegreeListAsync(id.Value);
+            Candidate = await _candidateRepository.GetByCandidateIdDegreeListAsync(id.Value)
+                ?? new Candidate();
 
             if (Candidate == null)
             {

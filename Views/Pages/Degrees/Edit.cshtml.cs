@@ -21,7 +21,7 @@ namespace Views.Pages.Degrees
         }
 
         [BindProperty]
-        public Degree Degree { get; set; }
+        public Degree Degree { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -30,7 +30,8 @@ namespace Views.Pages.Degrees
                 return NotFound();
             }
 
-            Degree = await _degreeRepository.GetByIdAsync(id.Value);
+            Degree = await _degreeRepository.GetByIdAsync(id.Value)
+                ?? new Degree();
 
             if (Degree == null)
             {
@@ -48,25 +49,28 @@ namespace Views.Pages.Degrees
                 return Page();
             }
 
-            var degrees = await _degreeRepository.GetAllAsync();
-            var existingDegree = degrees.FirstOrDefault(d => d.Name.Equals(Degree.Name, StringComparison.OrdinalIgnoreCase) && d.Id != Degree.Id);
+            var existingDegree = await _degreeRepository.GetByIdAsync(Degree.Id);
 
-            if (existingDegree != null)
+            if (existingDegree == null)
+            {
+                return NotFound();
+            }
+
+            existingDegree.Name = Degree.Name;
+
+            var degrees = await _degreeRepository.GetAllAsync();
+            var existingDegreeWithSameName = degrees.FirstOrDefault(d => d.Name.Equals(Degree.Name, StringComparison.OrdinalIgnoreCase) && d.Id != Degree.Id);
+
+            if (existingDegreeWithSameName != null)
             {
                 ModelState.AddModelError("Degree.Name", "Degree name must be unique.");
                 return Page();
             }
 
-            if (Degree == null)
-            {
-                return NotFound();
-            }
-
-            await _degreeRepository.UpdateAsync(Degree);
+            await _degreeRepository.UpdateAsync(existingDegree);
 
             return RedirectToPage("../Index");
         }
-
 
         private async Task<bool> DegreeExists(int id)
         {

@@ -21,9 +21,9 @@ namespace Views.Pages.Candidates
         [BindProperty]
         public Candidate Candidate { get; set; } = default!;
         [BindProperty]
-        public IFormFile UploadedDocument { get; set; }
+        public IFormFile? UploadedDocument { get; set; } = default!;
         [BindProperty]
-        public int[] SelectedDegreeIds { get; set; }
+        public int[] SelectedDegreeIds { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -32,7 +32,8 @@ namespace Views.Pages.Candidates
                 return NotFound();
             }
 
-            Candidate = await _candidateRepository.GetByCandidateIdDegreeListAsync(id.Value);
+            Candidate = await _candidateRepository.GetByCandidateIdDegreeListAsync(id.Value)
+                ?? new Candidate();
 
             if (Candidate == null)
             {
@@ -70,11 +71,12 @@ namespace Views.Pages.Candidates
         {
             if (candidateId.HasValue)
             {
-                Candidate = await _candidateRepository.GetByCandidateIdDegreeListAsync(candidateId.Value);
+                Candidate = await _candidateRepository.GetByCandidateIdDegreeListAsync(candidateId.Value)
+                    ?? new Candidate();
             }
 
             var allDegrees = await _degreeRepository.GetAllAsync();
-            var selectedIds = Candidate?.Degrees.Select(d => d.Id).ToList() ?? new List<int>();
+            var selectedIds = Candidate?.Degrees?.Select(d => d.Id).ToList() ?? new List<int>();
 
             ViewData["AllDegrees"] = allDegrees.Select(d => new SelectListItem
             {

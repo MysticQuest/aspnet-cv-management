@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using CvManagementApp.Models;
 using CvManagementApp.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace Views.Pages
 {
@@ -14,6 +15,9 @@ namespace Views.Pages
         {
             _candidateRepository = candidateRepository;
             _degreeRepository = degreeRepository;
+
+            Candidate = new List<Candidate>();
+            Degree = new List<Degree>();
         }
 
         public IList<Candidate> Candidate { get; private set; }
@@ -33,17 +37,15 @@ namespace Views.Pages
             {
                 return NotFound();
             }
-
-            return File(candidate.CV, candidate.CVMimeType, candidate.CVFileName);
+            string mimeType = candidate.CVMimeType ?? "application/octet-stream";
+            return File(candidate.CV, mimeType, candidate.CVFileName);
         }
 
         public async Task<IActionResult> OnGetDeleteUnassociatedDegreesAsync()
         {
-            var allDegrees = await _degreeRepository.GetAllAsync();
-            var usedDegrees = await _candidateRepository.GetAllUsedUniqueDegreesAsync();
+            var usedDegreeIds = new HashSet<int>((await _candidateRepository.GetAllUsedUniqueDegreesAsync()).Select(d => d.Id));
 
-            var unassociatedDegrees = allDegrees.Except(usedDegrees).ToList();
-            foreach (var degree in unassociatedDegrees)
+            foreach (var degree in (await _degreeRepository.GetAllAsync()).Where(d => !usedDegreeIds.Contains(d.Id)))
             {
                 await _degreeRepository.DeleteAsync(degree.Id);
             }
