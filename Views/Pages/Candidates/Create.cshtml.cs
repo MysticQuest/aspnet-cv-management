@@ -3,17 +3,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using CvManagementApp.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
+using CvManagementApp.Services;
 
 namespace Views.Pages.Candidates
 {
     public class CreateModel : PageModel
     {
-        private readonly CvManagementApp.Models.CvManagementDbContext _context;
+        private readonly ICandidateRepository _candidateRepository;
+        private readonly IRepository<Degree> _degreeRepository;
 
-        public CreateModel(CvManagementApp.Models.CvManagementDbContext context)
+        public CreateModel(ICandidateRepository candidateRepository, IRepository<Degree> degreeRepository)
         {
-            _context = context;
+            _candidateRepository = candidateRepository;
+            _degreeRepository = degreeRepository;
         }
 
         [BindProperty]
@@ -25,23 +27,14 @@ namespace Views.Pages.Candidates
         [BindProperty]
         public IFormFile UploadedDocument { get; set; }
 
-        public IActionResult OnGet()
+        public async Task<IActionResult> OnGet()
         {
-            ViewData["DegreeId"] = new SelectList(_context.Degrees, "Id", "Name");
+            ViewData["DegreeId"] = new SelectList(await _degreeRepository.GetAllAsync(), "Id", "Name");
             return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var degreesToAdd = new List<Degree>();
-
-            if (SelectedDegreeIds != null && SelectedDegreeIds.Length > 0)
-            {
-                degreesToAdd = await _context.Degrees
-                    .Where(d => SelectedDegreeIds.Contains(d.Id))
-                    .ToListAsync();
-            }
-
             if (UploadedDocument != null && UploadedDocument.Length > 0)
             {
                 var allowedContentTypes = new List<string>
@@ -67,18 +60,12 @@ namespace Views.Pages.Candidates
 
             if (!ModelState.IsValid)
             {
-                ViewData["DegreeId"] = new SelectList(_context.Degrees, "Id", "Name");
+                ViewData["DegreeId"] = new SelectList(await _degreeRepository.GetAllAsync(), "Id", "Name");
                 return Page();
             }
 
-            _context.Candidates.Add(Candidate);
-
-            foreach (var degree in degreesToAdd)
-            {
-                Candidate.Degrees.Add(degree);
-            }
-
-            await _context.SaveChangesAsync();
+            await _candidateRepository.AddAsync(Candidate);
+            await _candidateRepository.SetCandidateDegreesAsync(Candidate.Id, SelectedDegreeIds);
 
             return RedirectToPage("../Index");
         }

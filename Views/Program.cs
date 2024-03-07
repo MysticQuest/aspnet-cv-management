@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using CvManagementApp.Models;
+using CvManagementApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigureServices(builder.Services);
@@ -17,6 +18,9 @@ void ConfigureServices(IServiceCollection services)
         builder.Configuration.GetValue<string>("InMemoryDatabase:Name") ?? "CvManagementDb";
     builder.Services.AddDbContext<CvManagementDbContext>(options =>
     options.UseInMemoryDatabase(inMemoryDbName));
+
+    services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+    services.AddScoped<ICandidateRepository, CandidateRepository>();
 
     services.AddControllers(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 }

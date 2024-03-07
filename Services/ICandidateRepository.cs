@@ -8,9 +8,11 @@ using System.Threading.Tasks;
 
 namespace CvManagementApp.Services
 {
-    internal interface ICandidateRepository : IRepository<Candidate>
+    public interface ICandidateRepository : IRepository<Candidate>
     {
+        Task<IEnumerable<Candidate>> GetAllAsyncWithDegrees();
         Task<Candidate?> GetByCandidateIdDegreeListAsync(int candidateId);
         Task<IEnumerable<Degree>> GetAllUsedUniqueDegreesAsync();
+        Task SetCandidateDegreesAsync(int candidateId, IEnumerable<int> degreeIds);
     }
 }

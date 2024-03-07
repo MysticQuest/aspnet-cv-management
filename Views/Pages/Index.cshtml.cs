@@ -1,29 +1,33 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using CvManagementApp.Models;
+using CvManagementApp.Services;
 
 namespace Views.Pages
 {
     public class IndexModel : PageModel
     {
-        private readonly CvManagementApp.Models.CvManagementDbContext _context;
+        private readonly ICandidateRepository _candidateRepository;
+        private readonly IRepository<Degree> _degreeRepository;
 
-        public IndexModel(CvManagementApp.Models.CvManagementDbContext context)
+        public IndexModel(ICandidateRepository candidateRepository, IRepository<Degree> degreeRepository)
         {
-            _context = context;
+            _candidateRepository = candidateRepository;
+            _degreeRepository = degreeRepository;
         }
 
-        public IList<Candidate> Candidate { get; set; }
-        public IList<Degree> Degree { get; set; }
+        public IList<Candidate> Candidate { get; private set; }
+        public IList<Degree> Degree { get; private set; }
+
+        public async Task OnGetAsync()
+        {
+            Candidate = (await _candidateRepository.GetAllAsyncWithDegrees()).ToList();
+            Degree = (await _degreeRepository.GetAllAsync()).ToList();
+        }
 
         public async Task<IActionResult> OnGetDownloadCVAsync(int id)
         {
-            var candidate = await _context.Candidates.FirstOrDefaultAsync(x => x.Id == id);
+            var candidate = await _candidateRepository.GetByIdAsync(id);
 
             if (candidate == null || candidate.CV == null || candidate.CV.Length == 0)
             {
@@ -35,25 +39,16 @@ namespace Views.Pages
 
         public async Task<IActionResult> OnGetDeleteUnassociatedDegreesAsync()
         {
-            var allDegrees = await _context.Degrees.ToListAsync();
-            var associatedDegrees = await _context.Candidates
-                                                  .SelectMany(c => c.Degrees)
-                                                  .Distinct()
-                                                  .ToListAsync();
-            var unassociatedDegrees = allDegrees.Except(associatedDegrees).ToList();
-            _context.Degrees.RemoveRange(unassociatedDegrees);
-            await _context.SaveChangesAsync();
+            var allDegrees = await _degreeRepository.GetAllAsync();
+            var usedDegrees = await _candidateRepository.GetAllUsedUniqueDegreesAsync();
+
+            var unassociatedDegrees = allDegrees.Except(usedDegrees).ToList();
+            foreach (var degree in unassociatedDegrees)
+            {
+                await _degreeRepository.DeleteAsync(degree.Id);
+            }
 
             return RedirectToPage();
-        }
-
-
-        public async Task OnGetAsync()
-        {
-            Candidate = await _context.Candidates
-                          .Include(c => c.Degrees)
-                          .ToListAsync();
-            Degree = await _context.Degrees.ToListAsync();
         }
     }
 }

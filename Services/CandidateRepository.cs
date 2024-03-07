@@ -18,6 +18,11 @@ namespace CvManagementApp.Services
             _context = context;
         }
 
+        public async Task<IEnumerable<Candidate>> GetAllAsyncWithDegrees()
+        {
+            return await _context.Candidates.Include(c => c.Degrees).ToListAsync();
+        }
+
         public async Task<IEnumerable<Degree>> GetAllUsedUniqueDegreesAsync()
         {
             var usedDegrees = await _context.Candidates
@@ -36,6 +41,24 @@ namespace CvManagementApp.Services
                                  .AsNoTracking()
                                  .Include(c => c.Degrees)
                                  .FirstOrDefaultAsync(c => c.Id == candidateId);
+        }
+
+        public async Task SetCandidateDegreesAsync(int candidateId, IEnumerable<int> degreeIds)
+        {
+            var candidate = await _context.Candidates
+                                          .Include(c => c.Degrees)
+                                          .FirstOrDefaultAsync(c => c.Id == candidateId);
+
+            var degreesToSet = await _context.Degrees
+                                             .Where(degree => degreeIds.Contains(degree.Id))
+                                             .ToListAsync();
+
+            candidate.Degrees.Clear();
+            foreach (var degree in degreesToSet)
+            {
+                candidate.Degrees.Add(degree);
+            }
+            await _context.SaveChangesAsync();
         }
     }
 }
