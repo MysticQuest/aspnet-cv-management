@@ -27,7 +27,7 @@ namespace CvManagementApp.Services
             }
 
             existingCandidate.FirstName = candidate.FirstName;
-            existingCandidate.LastName = candidate.FirstName;
+            existingCandidate.LastName = candidate.LastName;
             existingCandidate.Email = candidate.Email;
             existingCandidate.Mobile = candidate.Mobile;
 

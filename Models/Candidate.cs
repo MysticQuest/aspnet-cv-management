@@ -15,8 +15,7 @@ namespace CvManagementApp.Models
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
 
-        [Phone]
-        [StringLength(10, MinimumLength = 10, ErrorMessage = "Mobile number must be 10 digits.")]
+        [RegularExpression("^([0-9]{10})$", ErrorMessage = "Invalid Mobile Number.")]
         public string? Mobile { get; set; }
 
         public ICollection<Degree>? Degrees { get; set; } = new List<Degree>();
