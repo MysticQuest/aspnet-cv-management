@@ -76,16 +76,11 @@ namespace Views.Pages.Candidates
 
             var allDegrees = await _degreeRepository.GetAllAsync();
             ViewData["AllDegrees"] = new SelectList(allDegrees, "Id", "Name");
-
-            // Convert SelectedDegreeIds to List<int> for consistent handling.
             var selectedDegreeIdsList = SelectedDegreeIds?.ToList() ?? new List<int>();
 
-            // Determine the IDs to select based on whether it's a form resubmission.
             var currentlySelectedIds = HttpContext.Request.Method.Equals("POST", StringComparison.OrdinalIgnoreCase)
                 ? selectedDegreeIdsList
-                : (candidateId.HasValue
-                    ? Candidate.Degrees?.Select(d => d.Id).ToList() ?? new List<int>()
-                    : new List<int>());
+                : Candidate?.Degrees?.Select(d => d.Id)?.ToList();
 
             ViewData["SelectedDegreeIds"] = currentlySelectedIds;
         }
