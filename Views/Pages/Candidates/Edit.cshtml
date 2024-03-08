@@ -37,15 +37,15 @@
                 <label asp-for="Candidate.Degrees" class="control-label"></label>
                 @{
                     var allDegrees = ViewData["AllDegrees"] as SelectList;
-                    var selectedDegreeIds = ViewData["SelectedDegreeIds"] as IEnumerable<int>;
+                    var selectedDegreeIds = ViewData["SelectedDegreeIds"] as IEnumerable<int> ?? Enumerable.Empty<int>();
 
-                    if (allDegrees != null && allDegrees.Any())
+                    if (allDegrees != null)
                     {
-                        @foreach (var degree in allDegrees)
+                        foreach (var degree in allDegrees)
                         {
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="SelectedDegreeIds" value="@degree.Value"
-                                @(selectedDegreeIds != null && selectedDegreeIds.Contains(int.Parse(degree.Value)) ? "checked" : "") />
+                                @(selectedDegreeIds.Contains(int.Parse(degree.Value)) ? "checked" : "") />
                                 <label class="form-check-label">@degree.Text</label>
                             </div>
                         }
